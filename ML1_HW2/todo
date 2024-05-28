@@ -1,0 +1,5 @@
+check softmax
+check why pos and neg values in output layer
+
+2nd argm in a scalar cannot be omitted
+update every function that used scalar.value

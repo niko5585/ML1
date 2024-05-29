@@ -188,7 +188,8 @@ def show_confusion_matrix_and_classification_report(nn: MLPClassifier, X_test: n
     #       Use `confusion_matrix` and `ConfusionMatrixDisplay` to plot the confusion matrix on the test data.
     #       Use `classification_report` to print the classification report.
 
-    return None
+    nn()
+confusion_matrix
 
 def perform_grid_search(X_train: np.ndarray, y_train: np.ndarray) -> MLPClassifier:
     """
@@ -212,7 +213,7 @@ def perform_grid_search(X_train: np.ndarray, y_train: np.ndarray) -> MLPClassifi
 
     mlp = MLPClassifier(max_iter=100, random_state=42)
 
-    grid_search = GridSearchCV(mlp, parameters, cv=5, verbose=4)
+    grid_search = GridSearchCV(mlp, parameters, cv=5, verbose=4, refit=True)
     grid_search.fit(X_train, y_train)
     est = grid_search.best_estimator_
 

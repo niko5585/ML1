@@ -83,33 +83,73 @@ def train_nn_with_regularization(X_train: np.ndarray, y_train: np.ndarray) -> ML
 
     # TODO: Use the code from the `train_nn` function, but add regularization to the MLPClassifier.
     #       Again, return the MLPClassifier that you consider to be the best.
+ 
 
-    configurations = {
-        'regularization_only': {'alpha': 0.1, 'early_stopping': False},
-        'early_stopping_only': {'alpha': 0.0001, 'early_stopping': True},
-        'both': {'alpha': 0.1, 'early_stopping': True}
-    }
-    results = {}
+    best_model = None
+    best_validation_accuracy = 0.0
 
-    # Training with different configurations
-    for label, config in configurations.items():
-        mlp = MLPClassifier(hidden_layer_sizes=(100,), max_iter=500, solver='adam',
-                            random_state=1, alpha=config['alpha'], early_stopping=config['early_stopping'])
-        mlp.fit(X_train, y_train)
-        results[label] = {
-            'model': mlp,
-            'train_accuracy': mlp.score(X_train, y_train),
-            'validation_accuracy': mlp.score(X_val, y_val),
-            'training_loss': mlp.loss_
-        }
-        print(f"Configuration: {label}")
-        print(f"Train Accuracy: {results[label]['train_accuracy'] * 100:.2f}%")
-        print(f"Validation Accuracy: {results[label]['validation_accuracy'] * 100:.2f}%")
-        print(f"Training Loss: {results[label]['training_loss']:.4f}")
+    # CASE A
 
-    # Selecting the model with the highest validation accuracy
-    best_model_label = max(results, key=lambda x: results[x]['validation_accuracy'])
-    return results[best_model_label]['model']
+    mlp_A = MLPClassifier(hidden_layer_sizes=(100,), max_iter=500, solver='adam',
+                        random_state=1, alpha=0.1, early_stopping=False)
+    mlp_A.fit(X_train, y_train)
+    train_accuracy = mlp_A.score(X_train, y_train)
+    validation_accuracy = mlp_A.score(X_val, y_val)
+    training_loss = mlp_A.loss_
+
+    print(f"Alpha: {mlp_A.alpha}, Early Stopping: {mlp_A.early_stopping}")
+    print(f"Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"Validation Accuracy: {validation_accuracy * 100:.2f}%")
+    print(f"Training Loss: {training_loss:.4f}\n")
+
+    # Track the best model
+    if validation_accuracy > best_validation_accuracy:
+        best_validation_accuracy = validation_accuracy
+        best_model = mlp_A
+
+     # CASE B
+
+    mlp_B = MLPClassifier(hidden_layer_sizes=(100,), max_iter=500, solver='adam',
+                        random_state=1, alpha=0.0, early_stopping=True)
+    mlp_B.fit(X_train, y_train)
+    train_accuracy = mlp_B.score(X_train, y_train)
+    validation_accuracy = mlp_B.score(X_val, y_val)
+    training_loss = mlp_B.loss_
+
+    print(f"Alpha: {mlp_B.alpha}, Early Stopping: {mlp_B.early_stopping}")
+    print(f"Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"Validation Accuracy: {validation_accuracy * 100:.2f}%")
+    print(f"Training Loss: {training_loss:.4f}\n")
+
+    # Track the best model
+    if validation_accuracy > best_validation_accuracy:
+        best_validation_accuracy = validation_accuracy
+        best_model = mlp_B
+    
+     # CASE C
+
+    mlp_C = MLPClassifier(hidden_layer_sizes=(100,), max_iter=500, solver='adam',
+                        random_state=1, alpha=0.1, early_stopping=True)
+    mlp_C.fit(X_train, y_train)
+    train_accuracy = mlp_C.score(X_train, y_train)
+    validation_accuracy = mlp_C.score(X_val, y_val)
+    training_loss = mlp_C.loss_
+
+    print(f"Alpha: {mlp_C.alpha}, Early Stopping: {mlp_C.early_stopping}")
+    print(f"Train Accuracy: {train_accuracy * 100:.2f}%")
+    print(f"Validation Accuracy: {validation_accuracy * 100:.2f}%")
+    print(f"Training Loss: {training_loss:.4f}\n")
+    
+
+    # Track the best model
+    if validation_accuracy > best_validation_accuracy:
+        best_validation_accuracy = validation_accuracy
+        best_model = mlp_C
+
+
+    print("Found  best model: alpha[%f] | early_stopping[%b]", best_model.alpha, best_model.early_stopping)
+    print("Acc:", best_validation_accuracy)
+    return best_model
 
 
 def plot_training_loss_curve(nn: MLPClassifier) -> None:
@@ -148,6 +188,7 @@ def show_confusion_matrix_and_classification_report(nn: MLPClassifier, X_test: n
     #       Use `confusion_matrix` and `ConfusionMatrixDisplay` to plot the confusion matrix on the test data.
     #       Use `classification_report` to print the classification report.
 
+    return None
 
 def perform_grid_search(X_train: np.ndarray, y_train: np.ndarray) -> MLPClassifier:
     """
@@ -163,4 +204,19 @@ def perform_grid_search(X_train: np.ndarray, y_train: np.ndarray) -> MLPClassifi
     #       Print the best score (mean cross validation score) and the best parameter set.
     #       Return the best estimator found by GridSearchCV.
 
-    return None
+    parameters = {
+    'alpha': [0.0, 0.1, 1.0],  
+    'solver': ['lbfgs', 'adam'],  
+    'hidden_layer_sizes': [(100,), (200,)] 
+    }
+
+    mlp = MLPClassifier(max_iter=100, random_state=42)
+
+    grid_search = GridSearchCV(mlp, parameters, cv=5, verbose=4)
+    grid_search.fit(X_train, y_train)
+    est = grid_search.best_estimator_
+
+    print("best estimator: ", est)
+    print("set_params: ", grid_search.set_params)
+
+    return est
